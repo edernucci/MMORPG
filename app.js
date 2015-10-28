@@ -388,6 +388,7 @@ exports.Npc = Npc;
 /// <reference path="Enemy.ts"/>
 /// <reference path="Npc.ts"/>
 /// <reference path="typings/node/node.d.ts"/>
+/// <reference path="typings/socket.io/socket.io.d.ts"/>
 var util = require("util");
 var express = require('express');
 var app = express();
@@ -659,10 +660,10 @@ function onNewMessage(data) {
     if (data.chatTo) {
         var chatTo = playerByName(data.chatTo);
         if (data.mode == "w" && chatTo) {
-            io.sockets.socket(chatTo.getID()).emit("new message", { player: id.getName(), text: data.text, mode: data.mode });
+            io.sockets.connected[chatTo.getID()].emit("new message", { player: id.getName(), text: data.text, mode: data.mode });
         }
         else if (!chatTo) {
-            io.sockets.socket(this.id).emit("new message", { player: "", text: "Player " + data.chatTo + " doesn't exist!", mode: "s" });
+            io.sockets.connected[this.id].emit("new message", { player: "", text: "Player " + data.chatTo + " doesn't exist!", mode: "s" });
         }
     }
     else {
