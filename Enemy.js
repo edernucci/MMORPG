@@ -1,140 +1,117 @@
-var cls = require("./Class").Class;
-var Enemy = cls.extend({
-	init: function(startX, startY, ID, typ) {
-		this.x = startX;
-		this.y = startY;
-		this.maxhp = 100;
-		this.currhp = this.maxhp;
-		this.strength = 5;
-		this.id = ID;
-		this.level = 1;
-		this.killTime = 0;
-		this.alive = true;
-		this.xp = 4;
-		this.type = typ;
-		this.baseXP = 39;
-		this.def = 10;
-		this.hitSpeed = 900;
-		this.respawnTime = 3000;
-		this.fighting = false;
-		this.fightingPlayers = [];
-		this.lastStrike = 0;
-		this.size = 32;
-	},
-
-	getX: function() {
-		return this.x;
-	},
-
-	getY: function() {
-		return this.y;
-	},
-
-	getID: function() {
-		return this.id;
-	},
-
-	getXP: function() {
-		return (this.baseXP * this.level) / 7;
-	},
-
-	getDef: function() {
-		return this.def;
-	},
-
-	getCurrHP: function() {
-		return this.currhp;
-	},
-
-	getStrength: function() {
-		return this.strength;
-	},
-
-	getRespawnTime: function() {
-		return this.respawnTime;
-	},
-
-	getHitSpeed: function() {
-		return this.hitSpeed;
-	},
-
-	getHurt: function(amount) {
-		this.currhp -= amount;
-		if(this.currhp < 0) {
-			this.alive = false;
-			this.currhp = 0;
-			this.killTime = Date.now();
-			this.fighting = false;
-			this.fightingPlayers = [];
-		}
-	},
-
-	getType: function() {
-		return this.type;
-	},
-
-	getLastStrike: function() {
-		return this.lastStrike;
-	},
-
-	isFighting: function() {
-		return this.fighting;
-	},
-
-	readyToHit: function() {
-		return (this.fighting && (Date.now() - this.lastStrike > this.hitSpeed));
-	},
-
-	killedPlayer: function() {
-		this.fightingPlayers.shift();
-		//if(fightingPlayers.length == 0) {
-			this.fighting = false;
-		//}
-	},
-
-	fightingAgainst: function() {
-		return this.fightingPlayers[0];
-	},
-
-	getKilltime: function() {
-		return this.killTime;
-	},
-
-	getXP: function() {
-		return this.xp;
-	},
-
-	setLastStrike: function(time) {
-		this.lastStrike = time;
-	},
-
-	setX: function(newX) {
-		this.x = newX;
-	},
-
-	setY: function(newY) {
-		this.y = newY;
-	},
-
-	setAlive: function() {
-		this.alive = true;
-		this.currhp = this.maxhp;
-	},
-
-	setFightingTrue: function(playerID) {
-		this.fighting = true;
-		this.fightingPlayers.push(playerID);
-	},
-
-	setFightingFalse: function() {
-		this.fighting = false;
-	},
-
-	isAlive: function() {
-		return this.alive;
-	}
-});
-
+var Enemy = (function () {
+    function Enemy(startX, startY, ID, typ) {
+        var _this = this;
+        this.x = {};
+        this.y = {};
+        this.alive = {};
+        this.playerAttacksEnemyID = {};
+        this.id = {};
+        this.getX = function () {
+            return _this.x;
+        };
+        this.getY = function () {
+            return _this.y;
+        };
+        this.getID = function () {
+            return _this.id;
+        };
+        this.getDef = function () {
+            return _this.def;
+        };
+        this.getCurrHP = function () {
+            return _this.currhp;
+        };
+        this.getStrength = function () {
+            return _this.strength;
+        };
+        this.getRespawnTime = function () {
+            return _this.respawnTime;
+        };
+        this.getHitSpeed = function () {
+            return _this.hitSpeed;
+        };
+        this.getHurt = function (amount) {
+            _this.currhp -= amount;
+            if (_this.currhp < 0) {
+                _this.alive = false;
+                _this.currhp = 0;
+                _this.killTime = Date.now();
+                _this.fighting = false;
+                _this.fightingPlayers = [];
+            }
+        };
+        this.getType = function () {
+            return _this.type;
+        };
+        this.getLastStrike = function () {
+            return _this.lastStrike;
+        };
+        this.isFighting = function () {
+            return _this.fighting;
+        };
+        this.readyToHit = function () {
+            return (_this.fighting && (Date.now() - _this.lastStrike > _this.hitSpeed));
+        };
+        this.killedPlayer = function () {
+            _this.fightingPlayers.shift();
+            //if(fightingPlayers.length == 0) {
+            _this.fighting = false;
+            //}
+        };
+        this.fightingAgainst = function () {
+            return _this.fightingPlayers[0];
+        };
+        this.getKilltime = function () {
+            return _this.killTime;
+        };
+        this.getXP = function () {
+            return _this.xp;
+        };
+        this.setLastStrike = function (time) {
+            _this.lastStrike = time;
+        };
+        this.setX = function (newX) {
+            _this.x = newX;
+        };
+        this.setY = function (newY) {
+            _this.y = newY;
+        };
+        this.setAlive = function () {
+            _this.alive = true;
+            _this.currhp = _this.maxhp;
+        };
+        this.setFightingTrue = function (playerID) {
+            _this.fighting = true;
+            _this.fightingPlayers.push(playerID);
+        };
+        this.setFightingFalse = function () {
+            _this.fighting = false;
+        };
+        this.isAlive = function () {
+            return _this.alive;
+        };
+        this.x = startX;
+        this.y = startY;
+        this.maxhp = 100;
+        this.currhp = this.maxhp;
+        this.strength = 5;
+        this.id = ID;
+        this.level = 1;
+        this.killTime = 0;
+        this.alive = true;
+        this.xp = 4;
+        this.type = typ;
+        this.baseXP = 39;
+        this.def = 10;
+        this.hitSpeed = 900;
+        this.respawnTime = 3000;
+        this.fighting = false;
+        this.fightingPlayers = [];
+        this.lastStrike = 0;
+        this.size = 32;
+    }
+    return Enemy;
+})();
 // Export the Enemy class so you can use it in
 // other files by using require("Enemy").Enemy
 exports.Enemy = Enemy;
