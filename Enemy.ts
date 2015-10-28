@@ -1,6 +1,6 @@
 class Enemy {
-	x = {}
-	y = {}
+	x: number
+	y: number
 	dir: number
 	alive = {}
 	maxhp: number
@@ -20,7 +20,7 @@ class Enemy {
 	respawnTime: number
 	fightingPlayers
 	size: number
-	constructor(startX, startY, ID, typ) {
+	constructor(startX, startY, ID, type) {
 		this.x = startX
 		this.y = startY
 		this.maxhp = 100
@@ -31,7 +31,7 @@ class Enemy {
 		this.killTime = 0
 		this.alive = true
 		this.xp = 4
-		this.type = typ
+		this.type = type
 		this.baseXP = 39
 		this.def = 10
 		this.hitSpeed = 900
@@ -42,7 +42,7 @@ class Enemy {
 		this.size = 32
 	}
 
-	getX = () => {
+	getX = (): number => {
 		return this.x;
 	}
 

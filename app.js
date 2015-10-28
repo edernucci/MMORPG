@@ -217,6 +217,7 @@ var Level = (function () {
         this.init = function () {
             var level = this;
             level.changeTo(1);
+            return this;
         };
         this.getMap = function () {
             return this.world;
@@ -235,10 +236,8 @@ var Level = (function () {
 })();
 exports.Level = Level;
 var Enemy = (function () {
-    function Enemy(startX, startY, ID, typ) {
+    function Enemy(startX, startY, ID, type) {
         var _this = this;
-        this.x = {};
-        this.y = {};
         this.alive = {};
         this.playerAttacksEnemyID = {};
         this.id = {};
@@ -334,7 +333,7 @@ var Enemy = (function () {
         this.killTime = 0;
         this.alive = true;
         this.xp = 4;
-        this.type = typ;
+        this.type = type;
         this.baseXP = 39;
         this.def = 10;
         this.hitSpeed = 900;
@@ -397,65 +396,24 @@ var db = require('mongojs').connect('localhost/mongoapp', ['users']);
 app.use(express.static(__dirname + '/public'));
 var io = require('socket.io').listen(app.listen(port));
 var socket, players, towers, enemies, npcs, items, world, collisionMap, npcList, worldSize, tileSize;
-function init() {
-    players = [];
-    enemies = [];
-    items = [];
-    npcs = [];
-    collisionMap = [];
-    var level = new Level();
-    level.init();
-    world = level.getMap();
-    worldSize = level.getWorldSize();
-    tileSize = level.getTileSize();
-    var enemyID = 0;
-    for (var w = 0; w < worldSize; w++) {
-        for (var h = 0; h < worldSize; h++) {
-            if (world[w][h] == 1) {
-                var newEnemy = new Enemy(w * tileSize, h * tileSize, enemyID, 0);
-                enemies.push(newEnemy);
-                enemyID++;
-            }
-        }
+var EventHandler = (function () {
+    function EventHandler() {
+        io.sockets.on("connection", this.onSocketConnection);
     }
-    npcList = level.getNpcList();
-    for (var x = 0; x < worldSize; x++) {
-        collisionMap[x] = [];
-        for (var y = 0; y < worldSize; y++) {
-            if (world[x][y] == 0) {
-                collisionMap[x][y] = 0;
-            }
-            else if (world[x][y] == 1) {
-                collisionMap[x][y] = 1;
-            }
-            else {
-                collisionMap[x][y] = 3;
-            }
-        }
-    }
-    for (var i = 0; i < npcList.length; i += 1) {
-        var newNpc = new Npc(npcList[i][1] * tileSize, npcList[i][2] * tileSize, npcList[i][3], npcList[i][5], npcList[i][6]);
-        npcs.push(newNpc);
-        collisionMap[npcList[i][1]][npcList[i][2]] = 2;
-    }
-    setEventHandlers();
-}
-;
-var setEventHandlers = function () {
-    io.sockets.on("connection", onSocketConnection);
-};
-function onSocketConnection(client) {
-    util.log("Player connected: " + client.id);
-    client.on("disconnect", onClientDisconnect);
-    client.on("player connected", onPlayerConnect);
-    client.on("move player", onMovePlayer);
-    client.on("new message", onNewMessage);
-    client.on("logout", onLogout);
-    client.on("start fight", onStartFight);
-    client.on("in fight", onFighting);
-    client.on("abort fight", onAbortFight);
-}
-;
+    EventHandler.prototype.onSocketConnection = function (client) {
+        util.log("Player connected: " + client.id);
+        client.on("disconnect", onClientDisconnect);
+        client.on("player connected", onPlayerConnect);
+        client.on("move player", onMovePlayer);
+        client.on("new message", onNewMessage);
+        client.on("logout", onLogout);
+        client.on("start fight", onStartFight);
+        client.on("in fight", onFighting);
+        client.on("abort fight", onAbortFight);
+    };
+    ;
+    return EventHandler;
+})();
 function onPlayerConnect(data) {
     var toClient = this;
     db.users.findOne({ playerName: data.playerName }, function (err, savedUser) {
@@ -522,8 +480,7 @@ function joinPlayer(client, playerName) {
                 players[j].setID(client.id);
             }
             else {
-                var existingPlayer = players[j];
-                client.broadcast.emit("new remote player", existingPlayer);
+                client.broadcast.emit("new remote player", players[j]);
             }
         }
         ;
@@ -617,7 +574,7 @@ var enemyFightLoop = setInterval(function () {
                     enemies[i].setLastStrike(Date.now());
                     if (!players[j].isAlive()) {
                         io.sockets.emit("player dead", { id: players[j].getID() });
-                        enemies[i].killedPlayer(players[j].getID());
+                        enemies[i].killedPlayer();
                     }
                 }
             }
@@ -719,7 +676,7 @@ function playerById(id) {
             return players[i];
     }
     ;
-    return false;
+    return null;
 }
 ;
 function playerByName(playerName) {
@@ -730,7 +687,48 @@ function playerByName(playerName) {
         }
     }
     ;
-    return false;
+    return null;
 }
 ;
-init();
+(function () {
+    players = [];
+    enemies = [];
+    items = [];
+    npcs = [];
+    collisionMap = [];
+    var level = new Level().init();
+    world = level.getMap();
+    worldSize = level.getWorldSize();
+    tileSize = level.getTileSize();
+    var enemyID = 0;
+    for (var i = 0; i < worldSize; i++) {
+        for (var h = 0; h < worldSize; h++) {
+            if (world[i][h] == 1) {
+                var newEnemy = new Enemy(i * tileSize, h * tileSize, enemyID, 0);
+                enemies.push(newEnemy);
+                enemyID++;
+            }
+        }
+    }
+    npcList = level.getNpcList();
+    for (var x = 0; x < worldSize; x++) {
+        collisionMap[x] = [];
+        for (var y = 0; y < worldSize; y++) {
+            if (world[x][y] == 0) {
+                collisionMap[x][y] = 0;
+            }
+            else if (world[x][y] == 1) {
+                collisionMap[x][y] = 1;
+            }
+            else {
+                collisionMap[x][y] = 3;
+            }
+        }
+    }
+    for (var i = 0; i < npcList.length; i += 1) {
+        var newNpc = new Npc(npcList[i][1] * tileSize, npcList[i][2] * tileSize, npcList[i][3], npcList[i][5], npcList[i][6]);
+        npcs.push(newNpc);
+        collisionMap[npcList[i][1]][npcList[i][2]] = 2;
+    }
+    new EventHandler;
+})();

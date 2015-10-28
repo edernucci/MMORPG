@@ -16,131 +16,51 @@ var io = require('socket.io').listen(app.listen(port));
 /**************************************************
 ** GAME VARIABLES
 **************************************************/
-var socket,		// Socket controller
-	players,	// Array of connected players
+var socket,
+	players: Player[],
 	towers,
-	enemies,	// Array of enemies
-	npcs,
-	items,		// Array of potions, etc.
-	world,		// Array of the map
+	enemies: Enemy[],
+	npcs: Npc[],
+	items,
+	world,
 	collisionMap,
 	npcList,
 	worldSize,
 	tileSize;
 
-/**************************************************
-** GAME INITIALISATION
-**************************************************/
-function init() {
-	// Create an empty array to store players
-	players = [];
 
-	// Create an empty array to store enemies
-	enemies = [];
-
-	// Empty array to store items - format: [x, y, type]
-	items = [];
-
-	npcs = [];
-	collisionMap = [];
-
-	// Initialize the world array
-	var level = new Level();
-	level.init();
-
-	world = level.getMap();
-	worldSize = level.getWorldSize();
-	tileSize = level.getTileSize();
-
-	// Init enemy array
-	var enemyID = 0;
-	for (var w = 0; w < worldSize; w++) {
-		for (var h = 0; h < worldSize; h++) {
-			if (world[w][h] == 1) {
-				var newEnemy = new Enemy(w * tileSize, h * tileSize, enemyID, 0);
-				enemies.push(newEnemy);
-				enemyID++;
-			}
-		}
+class EventHandler {
+	constructor() {
+		io.sockets.on("connection", this.onSocketConnection);
 	}
+	onSocketConnection(client) {
+		util.log("Player connected: " + client.id);
 
-	// Init npc array
-	npcList = level.getNpcList();
+		// Listen for client disconnected
+		client.on("disconnect", onClientDisconnect);
 
-	// Create empty collision map
-	for (var x = 0; x < worldSize; x++) {
-		collisionMap[x] = [];
+		// Listen for new player message
+		client.on("player connected", onPlayerConnect);
 
-		for (var y = 0; y < worldSize; y++) {
-			if (world[x][y] == 0) {
-				collisionMap[x][y] = 0;
-			}
-			else if (world[x][y] == 1) {
-				collisionMap[x][y] = 1;
-			}
-			else {
-				collisionMap[x][y] = 3;
-			}
-		}
-	}
+		// Listen for move player message
+		client.on("move player", onMovePlayer);
 
-	// Fill collision map
-	for (var i = 0; i < npcList.length; i += 1) {
-		var newNpc = new Npc(npcList[i][1] * tileSize, npcList[i][2] * tileSize, npcList[i][3], npcList[i][5], npcList[i][6]);
-		npcs.push(newNpc);
-		collisionMap[npcList[i][1]][npcList[i][2]] = 2;
-	}
+		// Listen for new messages
+		client.on("new message", onNewMessage);
 
-	// Configure Socket.IO
-	/*io.configure(function() {
-		// Only use WebSockets
-		io.set("transports", ["websocket"]);
+		// Listen for logout
+		client.on("logout", onLogout);
 
-		// Restrict log output
-		io.set("log level", 2);
-	});*/
+		// Player going to fight
+		client.on("start fight", onStartFight);
 
-	// Start listening for events
-	setEventHandlers();
-};
+		// Player attacked enemy
+		client.on("in fight", onFighting);
 
-
-/**************************************************
-** GAME EVENT HANDLERS
-**************************************************/
-var setEventHandlers = function() {
-	// Socket.IO
-	io.sockets.on("connection", onSocketConnection);
-};
-
-// New socket connection
-function onSocketConnection(client) {
-	util.log("Player connected: " + client.id);
-
-	// Listen for client disconnected
-	client.on("disconnect", onClientDisconnect);
-
-	// Listen for new player message
-	client.on("player connected", onPlayerConnect);
-
-	// Listen for move player message
-	client.on("move player", onMovePlayer);
-
-	// Listen for new messages
-	client.on("new message", onNewMessage);
-
-	// Listen for logout
-	client.on("logout", onLogout);
-
-	// Player going to fight
-	client.on("start fight", onStartFight);
-
-	// Player attacked enemy
-	client.on("in fight", onFighting);
-
-	// Player ended fight
-	client.on("abort fight", onAbortFight);
-};
+		// Player ended fight
+		client.on("abort fight", onAbortFight);
+	};
+}
 
 function onPlayerConnect(data) {
 	var toClient = this;
@@ -225,8 +145,7 @@ function joinPlayer(client, playerName) {
 				players[j].setID(client.id);
 			}
 			else {
-				var existingPlayer = players[j];
-				client.broadcast.emit("new remote player", existingPlayer);
+				client.broadcast.emit("new remote player", players[j]);
 			}
 		};
 	}
@@ -321,7 +240,8 @@ var enemyFightLoop = setInterval(function() {
 					enemies[i].setLastStrike(Date.now());
 					if (!players[j].isAlive()) {
 						io.sockets.emit("player dead", { id: players[j].getID() });
-						enemies[i].killedPlayer(players[j].getID());
+						//enemies[i].killedPlayer(players[j].getID());
+						enemies[i].killedPlayer();
 					}
 				}
 			};
@@ -436,41 +356,76 @@ function onNewMessage(data) {
 ** GAME HELPER FUNCTIONS
 **************************************************/
 // Find player by ID
-function playerById(id) {
+function playerById(id): Player {
 	var i;
 	for (i = 0; i < players.length; i++) {
 		if (players[i].getID() == id)
 			return players[i];
 	};
 
-	return false;
+	return null;
 };
 
-function playerByName(playerName) {
+function playerByName(playerName): Player {
 	var j;
 	for (j = 0; j < players.length; j++) {
 		if (players[j].getName() == playerName) {
 			return players[j];
 		}
 	};
-	return false;
+	return null;
 };
-/**************************************************
-** RUN THE GAME
-**************************************************/
-init();
 
-/*****************************************
- * NOTES
- *****************************************
+// init
+(() => {
+	players = [];
+	enemies = [];
+	items = [];
+	npcs = [];
+	collisionMap = [];
 
-$ sudo apt-get install mongodb
-$ sudo npm install mongojs
-Dann, um auf die DB zuzugreifen:
-mongo mongoapp
-Commands für darin (die collection "users" wird oben beim connect schon erstellt):
-show collections - zeigt alle collections in der DB
-db.users.find() - listet alle Dokumente in der DB auf
-db.users.drop() - löscht die collection
-db.users.findOne( { playerName: data.playerName } ) - durchsucht alle Dokumente nach dem value
-db.users.ensureIndex({id:1}, {unique : true}); - sorgt dafür, dass jede ID nur einmal vorkommt */
+	var level = new Level().init();
+
+	world = level.getMap();
+	worldSize = level.getWorldSize();
+	tileSize = level.getTileSize();
+
+	var enemyID = 0;
+	for (var i = 0; i < worldSize; i++) {
+		for (var h = 0; h < worldSize; h++) {
+			if (world[i][h] == 1) {
+				var newEnemy = new Enemy(i * tileSize, h * tileSize, enemyID, 0);
+				enemies.push(newEnemy);
+				enemyID++;
+			}
+		}
+	}
+
+	// Init npc array
+	npcList = level.getNpcList();
+
+	// Create empty collision map
+	for (var x = 0; x < worldSize; x++) {
+		collisionMap[x] = [];
+
+		for (var y = 0; y < worldSize; y++) {
+			if (world[x][y] == 0) {
+				collisionMap[x][y] = 0;
+			}
+			else if (world[x][y] == 1) {
+				collisionMap[x][y] = 1;
+			}
+			else {
+				collisionMap[x][y] = 3;
+			}
+		}
+	}
+
+	// Fill collision map
+	for (var i = 0; i < npcList.length; i += 1) {
+		var newNpc = new Npc(npcList[i][1] * tileSize, npcList[i][2] * tileSize, npcList[i][3], npcList[i][5], npcList[i][6]);
+		npcs.push(newNpc);
+		collisionMap[npcList[i][1]][npcList[i][2]] = 2;
+	}
+	new EventHandler
+})()

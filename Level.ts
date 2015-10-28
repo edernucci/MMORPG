@@ -63,12 +63,14 @@ class Level {
 			}
 		}
 	};
-	init = function() {
+	init = function() : Level {
 		// Link level
 		var level = this;
 
 		// Init first level
 		level.changeTo(1);
+		
+		return this
 	};
 
 	getMap = function() {
