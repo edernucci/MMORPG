@@ -1,3 +1,5 @@
+/* global playerName */
+/* global collisionMap */
 /**************************************************
 ** GAME VARIABLES
 **************************************************/
@@ -429,7 +431,7 @@ function logout() {
 	socket.emit("logout", { id: localPlayer.getID() });
 	console.log("Player " + localPlayer.getID() + " logged out");
 	socket.emit("disconnect");
-	window.location = "login.html";
+	window.location.href = "login.html";
 }
 
 document.onkeyup = function (e) {
