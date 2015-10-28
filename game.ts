@@ -17,9 +17,7 @@ var io: SocketIO.Server = require('socket.io').listen(app.listen(port));
 /**************************************************
 ** GAME VARIABLES
 **************************************************/
-var socket,
-	players: Player[],
-	towers,
+var players: Player[],
 	enemies: Enemy[],
 	npcs: Npc[],
 	items,
@@ -311,6 +309,7 @@ function dropItem(x, y) {
 			itemType = 1;
 			itemChange = 40;
 		}
+		//TODO: item should be strong typed
 		var item = [x, y, itemType, itemChange];
 		items.push(item);
 		io.sockets.emit("new item", { x: x, y: y, type: itemType });

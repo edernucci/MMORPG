@@ -396,7 +396,7 @@ var port = 8000;
 var db = require('mongojs').connect('localhost/mongoapp', ['users']);
 app.use(express.static(__dirname + '/public'));
 var io = require('socket.io').listen(app.listen(port));
-var socket, players, towers, enemies, npcs, items, world, collisionMap, npcList, worldSize, tileSize;
+var players, towers, enemies, npcs, items, world, collisionMap, npcList, worldSize, tileSize;
 var EventHandler = (function () {
     function EventHandler() {
         io.sockets.on("connection", this.onSocketConnection);
