@@ -21,7 +21,7 @@
 	"showOutput": "silent",
 
 	// args is the HelloWorld program to compile.
-	"args": ["Player.ts", "Level.ts", "Enemy.ts", "Npc.ts"],
+	"args": ["Player.ts", "Level.ts", "Enemy.ts", "Npc.ts", "game.ts", "--removeComments", "--out", "app.js"],
 
 	// use the standard tsc problem matcher to find compile problems
 	// in the output.

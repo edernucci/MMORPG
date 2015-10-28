@@ -7,7 +7,7 @@ var util = require("util"),					// Utility resources (logging, object inspection
 
 function init() {
 	// Configure Socket.IO
-	io.configure(function() {
+	io.configure(function () {
 		// Only use WebSockets
 		io.set("transports", ["websocket"]);
 
@@ -22,14 +22,14 @@ function init() {
 /**************************************************
 ** GAME EVENT HANDLERS
 **************************************************/
-var setEventHandlers = function() {
+var setEventHandlers = function () {
 	// Socket.IO
 	io.sockets.on("connection", onSocketConnection);
 };
 
 // New socket connection
 function onSocketConnection(client) {
-	util.log("Player connected: "+client.id);
+	util.log("Player connected: " + client.id);
 
 	// Listen for client disconnected
 	client.on("disconnect", onClientDisconnect);
@@ -40,7 +40,7 @@ function onSocketConnection(client) {
 
 // Socket client has disconnected
 function onClientDisconnect() {
-	util.log("Player has disconnected: "+this.id);
+	util.log("Player has disconnected: " + this.id);
 	this.emit("disconnect");
 };
 
@@ -48,8 +48,8 @@ var playerFound;
 function checkLogin(data) {
 	playerFound = false;
 	var toClient = this;
-	db.users.findOne( { playerName: data.playerName }, function(err, savedUser) {
-		if(err || !savedUser) {
+	db.users.findOne({ playerName: data.playerName }, function (err, savedUser) {
+		if (err || !savedUser) {
 			console.log("User not in db");
 			/*var player = new Player(128, 192, data.playerName, 100);
 			db.users.save(player, function(err2, savedUser2) {
@@ -70,7 +70,7 @@ function checkLogin(data) {
 };
 
 function tellClient(toClient, playerName) {
-	console.log("found?"+playerFound);
-	toClient.emit("login checked", {found: playerFound, playerName: playerName});
+	console.log("found?" + playerFound);
+	toClient.emit("login checked", { found: playerFound, playerName: playerName });
 };
 init();

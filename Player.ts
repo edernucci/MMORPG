@@ -18,7 +18,7 @@ class Player {
 	hitSpeed: number
 	playerAttacksEnemyID = {}
 	id = {}
-	constructor(startX, startY, pName, hp, id) {
+	constructor(startX, startY, pName, hp, id?) {
 		this.x = startX;
 		this.absX = this.x;
 		this.y = startY;

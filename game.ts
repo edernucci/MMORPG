@@ -1,23 +1,14 @@
-/**************************************************
-** NODE.JS REQUIREMENTS
-**************************************************/
-/*var util = require("util"),					// Utility resources (logging, object inspection, etc)
-	io = require("socket.io").listen(8000),				// Socket.IO
-	Player = require("./Player").Player,	// Player class
-	Enemy = require("./Enemy").Enemy,	// Enemy class
-	Level = require("./Level").Level,
-	db = require('mongojs').connect('localhost/mongoapp', ['users']),
-	Npc = require("./Npc").Npc;*/
+/// <reference path="Level.ts"/>
+/// <reference path="Player.ts"/>
+/// <reference path="Enemy.ts"/>
+/// <reference path="Npc.ts"/>
+/// <reference path="typings/node/node.d.ts"/>
 
-var util = require("util"),					// Utility resources (logging, object inspection, etc)
-	express = require('express'),
-	app = express(),
-	port = 8000,
-	Player = require("./Player").Player,	// Player class
-	Enemy = require("./Enemy").Enemy,	// Enemy class
-	Level = require("./Level").Level,
-	db = require('mongojs').connect('localhost/mongoapp', ['users']),
-	Npc = require("./Npc").Npc;
+var util = require("util")
+var express = require('express')
+var app = express()
+var port = 8000
+var db = require('mongojs').connect('localhost/mongoapp', ['users'])
 
 app.use(express.static(__dirname + '/public'));
 var io = require('socket.io').listen(app.listen(port));
@@ -52,99 +43,6 @@ function init() {
 
 	npcs = [];
 	collisionMap = [];
-
-	/*var player = {name: "player"};
-	db.users.insert(player, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User not saved because of error" + err);
-		}
-		else {
-			console.log("User saved");
-		}
-	});
-
-	var player2 = {name: "player2"};
-	db.users.insert(player2, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User not saved because of error" + err);
-		}
-		else {
-			console.log("User saved");
-		}
-	});*/
-
-	//db.users.remove();
-
-	//db.users.ensureIndex({id:1}, {unique : true});
-
-	/*var player2 = {id: 1, name: "player"};
-	db.users.save(player, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User not saved because of error" + err);
-		}
-		else {
-			console.log("User saved");
-		}
-	});*/
-
-	/*db.users.find( { $where: 'id == 1'}, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User in db");
-			var player = {id: 1, name: "player"};
-			db.users.save(player, function(err, savedUser) {
-				if(err || !savedUser) {
-					console.log("User not saved because of error" + err);
-				}
-				else {
-					console.log("User saved");
-				}
-			});
-		}
-		else {
-			console.log("User not found" + err);
-		}
-	});
-
-	db.users.find( { $where: 'this.id == 1'}, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User in db");
-			var player = {id: 1, name: "player"};
-			db.users.save(player, function(err, savedUser) {
-				if(err || !savedUser) {
-					console.log("User not saved because of error" + err);
-				}
-				else {
-					console.log("User saved");
-				}
-			});
-		}
-		else {
-			console.log("User not found" + err);
-		}
-	});*/
-	//db.users.find( { id: { $in: 1} }, { id: 1 } );
-
-	/*var player = {id: 1, vorname: "player", nachname: "eins"};
-	db.users.save(player, function(err, savedUser) {
-		if(err || !savedUser) {
-			console.log("User not saved because of error" + err);
-		}
-		else {
-			console.log("User saved");
-			//show();
-			listAllData();
-		}
-	});*/
-
-	//db.users.update( { id: { $in: 1 } }, { $set: { nachname: "zwei" } } );
-
-	/*db.users.update( { vorname: "player" }, { $set: { 'nachname': 'zwei' },})
-
-	var listAllData = function(err, collection) {
-	    db.users.find().toArray(function(err, results) {
-		console.log(results);
-	    });
-	}*/
 
 	// Initialize the world array
 	var level = new Level();
@@ -210,7 +108,7 @@ function init() {
 /**************************************************
 ** GAME EVENT HANDLERS
 **************************************************/
-var setEventHandlers = function () {
+var setEventHandlers = function() {
 	// Socket.IO
 	io.sockets.on("connection", onSocketConnection);
 };
@@ -246,13 +144,13 @@ function onSocketConnection(client) {
 
 function onPlayerConnect(data) {
 	var toClient = this;
-	db.users.findOne({ playerName: data.playerName }, function (err, savedUser) {
+	db.users.findOne({ playerName: data.playerName }, function(err, savedUser) {
 		if (err || !savedUser) {
 			console.log("User " + data.playername + " not in db");
 			toClient.emit("no player");
 			//return;
 			var player = new Player(128, 192, data.playerName, 100);
-			db.users.save(player, function (err2, savedUser2) {
+			db.users.save(player, function(err2, savedUser2) {
 				if (err2 || !savedUser2) {
 					console.log("User not saved because of error" + err2);
 				}
@@ -364,7 +262,7 @@ function onAbortFight(data) {
 	};
 };
 
-var playerFightLoop = setInterval(function () {
+var playerFightLoop = setInterval(function() {
 	for (var i = 0; i < players.length; i++) {
 		if (players[i].readyToHit()) {
 			var enemy = enemies[players[i].getEnemyID()];
@@ -386,7 +284,7 @@ var playerFightLoop = setInterval(function () {
 	}
 }, 16);
 
-var calculateDamage = function (att, def) {
+var calculateDamage = function(att, def) {
 	// Math.random() * (max - min + 1) + min;
 	var damage = Math.floor((Math.random() * ((att - def) - (att - def - 8))) + (att - def - 8));
 	if (damage < 0) damage = 0;
@@ -394,8 +292,8 @@ var calculateDamage = function (att, def) {
 	return damage;
 }
 
-var enemyFightLoop = setInterval(function () {
-	for (i = 0; i < enemies.length; i++) {
+var enemyFightLoop = setInterval(function() {
+	for (var i = 0; i < enemies.length; i++) {
 		if (!enemies[i].isAlive() && (Date.now() - enemies[i].getKilltime() > enemies[i].getRespawnTime())) {
 			for (var j = 0; j < players.length; j++) {
 				// If player stands on the tile, don't respawn yet (first is for passing tile, second - after || - is for right on the tile
