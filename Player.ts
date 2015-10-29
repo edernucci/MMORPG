@@ -7,7 +7,7 @@ class Player {
 	alive = {}
 	maxhp = {}
 	money = {}
-	currhp = {}
+	currhp: number
 	playerName = {}
 	canvasXnull = {}
 	canvasYnull = {}
@@ -40,71 +40,67 @@ class Player {
 		this.id = id;
 	}
 
-	getX = function() {
+	getX = () => {
 		return this.x
 	}
 
-	getAbsX = function() {
+	getAbsX = () => {
 		return this.absX;
 	}
 
-	getY = function() {
+	getY = () => {
 		return this.y;
 	}
 
-	getAbsY = function() {
+	getAbsY = () => {
 		return this.absY;
 	}
 
-	xpForLevel = function(level) {
+	xpForLevel = (level) => {
 		return level * level * level;
 	}
 
-	getID = function() {
+	getID = () => {
 		return this.id;
 	}
 
-	getName = function() {
+	getName = () => {
 		return this.playerName;
 	}
 
-	getRestart = function() {
-		return this.restart;
-	}
-
-	getDir = function() {
+	getDir = () => {
 		return this.dir;
 	}
 
-	getCanvasXnull = function() {
+	getCanvasXnull = () => {
 		return this.canvasXnull;
 	}
 
-	getCanvasYnull = function() {
+	getCanvasYnull = () => {
 		return this.canvasYnull;
 	}
 
-	getStrength = function() {
+	getStrength = () => {
 		return this.strength;
 	}
 
-	getEnemyID = function() {
+	getEnemyID = () => {
 		return this.playerAttacksEnemyID;
 	}
 
-	getLastStrike = function() {
+	getLastStrike = () => {
 		return this.lastStrike;
 	}
 
-	getHitSpeed = function() {
+	getHitSpeed = () => {
 		return this.hitSpeed;
 	}
 
-	getCurrHP = function() {
+	getCurrHP = () => {
 		return this.currhp;
 	}
 
-	getHurt = function(amount) {
+	getHurt = (amount) => {
 		this.currhp -= amount;
 		if (this.currhp < 0) {
 			this.currhp = 0;
@@ -112,80 +108,76 @@ class Player {
 		}
 	}
 
-	isAlive = function() {
+	isAlive = () => {
 		return this.alive;
 	}
 
-	setLastStrike = function(time) {
+	setLastStrike = (time) => {
 		this.lastStrike = time;
 	}
 
-	setID = function(id) {
+	setID = (id) => {
 		this.id = id;
 	}
 
-	isGoingToFight = function() {
+	isGoingToFight = () => {
 		return (this.goAttack || this.fighting);
 	}
 
-	isFighting = function() {
+	isFighting = () => {
 		return this.fighting;
 	}
 
-	setEnemyID = function(id) {
+	setEnemyID = (id) => {
 		this.playerAttacksEnemyID = id;
 	}
 
-	setX = function(newX) {
+	setX = (newX) => {
 		this.x = newX;
 	}
 
-	setAbsX = function(newX) {
+	setAbsX = (newX) => {
 		this.absX = newX;
 	}
 
-	setY = function(newY) {
+	setY = (newY) => {
 		this.y = newY;
 	}
 
-	setAbsY = function(newY) {
+	setAbsY = (newY) => {
 		this.absY = newY;
 	}
 
-	setRestart = function(bool) {
-		this.restart = bool;
-	}
-
-	setDirection = function(direction) {
+	setDirection = (direction) => {
 		this.dir = direction;
 	}
 
-	setCanvasXnull = function(x) {
+	setCanvasXnull = (x) => {
 		this.canvasXnull = x;
 	}
 
-	setCanvasYnull = function(y) {
+	setCanvasYnull = (y) => {
 		this.canvasYnull = y;
 	}
 
-	setGoAttackTrue = function() {
+	setGoAttackTrue = () => {
 		this.goAttack = true;
 	}
 
-	setGoAttackFalse = function() {
+	setGoAttackFalse = () => {
 		this.goAttack = false;
 		this.fighting = false;
 	}
 
-	inFight = function() {
+	inFight = () => {
 		this.fighting = true;
 	}
 
-	readyToHit = function() {
+	readyToHit = () => {
 		return (this.fighting && (Date.now() - this.lastStrike > this.hitSpeed));
 	}
 
-	takeItem = function(type, change) {
+	takeItem = (type, change) => {
 		if (type == 0) {
 			this.currhp += change;
 		}
