@@ -1,3 +1,5 @@
+
+
 class Level {
 	world = [[]]
 	tileSize = 32
